@@ -9,6 +9,7 @@ const app = express();
 const path = require('path');
 const port = 3000;
 const engine = require('ejs-mate');
+const users = require('./helpers/sampleUsers');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res, next) => {
-    res.render('main/main');
+    res.render('main/main', { users });
 });
 
 app.listen(port, () => console.log(`Server is running on http://localhost:${port}`));
