@@ -1,0 +1,36 @@
+.mainContainer {
+    width: 65%;
+}
+
+.movementDates {
+    font-size: 12px;
+    font-style: italic;
+    color: grey;
+}
+
+.transactionItem {
+    height: 80px;
+    background-color: white;
+}
+
+.sumText {
+    font-size: 12px;
+    letter-spacing: -1px;
+    /* font-weight: bold; */
+}
+
+.transactionFooter {
+    height: 48px;
+}
+
+.transferMoney {
+    background: linear-gradient(145deg, rgb(253, 208, 123), rgb(250, 162, 0));
+}
+
+.requestLoan {
+    background: linear-gradient(145deg, rgb(85, 200, 85), rgb(1, 140, 1));
+}
+
+.closeAccount {
+    background: linear-gradient(145deg, rgb(255, 96, 96), rgb(180, 48, 48));
+}

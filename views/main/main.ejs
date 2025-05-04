@@ -1,3 +1,125 @@
-<%- layout("layouts/boilerplate") %>
+<!-- prettier-ignore -->
+<%- layout("layouts/boilerplate") %> 
+<% const currentUser = users[0] %>
+<% const { movements, movementDates } = currentUser %>
 
-<h1 class="display-5">Hello</h1>
+<div class="mainContainer container w-75 ps-5 pe-5">
+    <!-- Current balance header -->
+
+    <div class="row mt-3 mb-2 d-flex align-items-end">
+        <div class="col">
+            <h3 class="mb-0">Current Balance</h3>
+            <p class="fs-6 fst-italic text-secondary currentDate"><%= new Date() %></p>
+        </div>
+        <div class="col">
+            <h1 class="display-4 text-end">25 952,59 €</h1>
+        </div>
+    </div>
+
+    <!-- Transactions main -->
+
+    <div class="row gx-5">
+        <!-- Transactions - list -->
+
+        <div class="col-7">
+            <div class="row">
+                <ul class="list-unstyled p-0 mb-0 overflow-auto rounded-top rounded-bottom border" style="height: 505px">
+                    <% for (let i = movements.length - 1; i >= 0; i--) { %>
+                    <li class="transactionItem d-flex justify-content-between align-items-center ps-5 pe-5 <%= i === 0 ? '' : 'border-bottom' %>">
+                        <div>
+                            <span class="badge <%= movements[i] < 0 ? 'text-bg-danger' : 'text-bg-primary' %>"><%= i + 1 %> <%= movements[i] < 0 ? "Withdrawal" : "Deposit" %></span>
+                            <span class="movementDates ms-3"><%= movementDates[i] %></span>
+                        </div>
+                        <span class="fs-5"><%= Math.abs(movements[i]) %></span>
+                    </li>
+                    <% } %>
+                </ul>
+            </div>
+
+            <!-- Transactions - summary -->
+
+            <div class="row mt-3 text-center d-flex align-items-center transactionFooter">
+                <div class="col-3">
+                    <span class="text-uppercase sumText">In</span>
+                    <span class="fs-4 text-primary">3000</span>
+                </div>
+                <div class="col-3">
+                    <span class="text-uppercase sumText">Out</span>
+                    <span class="fs-4 text-danger">3000</span>
+                </div>
+                <div class="col-3">
+                    <span class="text-uppercase sumText">Interest</span>
+                    <span class="fs-4 text-secondary">3000</span>
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-secondary">↑ Sort</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions - forms -->
+
+        <div class="col-5 d-flex flex-column justify-content-start mt-0">
+            <form action="" class="row p-4 rounded mb-3 transferMoney">
+                <div class="row">
+                    <h5 class="mb-3">Transfer money</h5>
+                </div>
+                <div class="row">
+                    <div class="col-5">
+                        <input type="text" class="form-control" id="username" />
+                        <label for="username" class="form-label text-center">Username</label>
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control" id="amount" />
+                        <label for="amount" class="form-label">Amount</label>
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-light">→</button>
+                    </div>
+                </div>
+            </form>
+            <form action="" class="row bg-success p-4 rounded mb-3 requestLoan">
+                <div class="row">
+                    <h5 class="mb-3">Request loan</h5>
+                </div>
+                <div class="row">
+                    <div class="col-10">
+                        <input type="number" class="form-control" id="amount" />
+                        <label for="amount" class="form-label">Amount</label>
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-light">→</button>
+                    </div>
+                </div>
+            </form>
+            <form action="" class="row bg-danger p-4 rounded closeAccount">
+                <div class="row">
+                    <h5 class="mb-3">Close account</h5>
+                </div>
+                <div class="row">
+                    <div class="col-5">
+                        <input type="text" class="form-control" id="username" />
+                        <label for="username" class="form-label text-center">Username</label>
+                    </div>
+                    <div class="col-5">
+                        <input type="password" class="form-control" id="password" />
+                        <label for="password" class="form-label">Password</label>
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-light">→</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Transactions - auto logout -->
+
+            <div class="row mt-3 d-flex align-items-center transactionFooter">
+                <div class="col d-flex justify-content-end">
+                    <span class="countdown text-secondary fst-italic">You'll be automatically logged out in 10:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="scripts/index.js"></script>
