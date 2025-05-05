@@ -1,8 +1,11 @@
 .mainContainer {
     width: 65%;
+    /* opacity: 1; */
+    transition: all ease-in-out 1000ms;
+    /* transition: opacity 0.5s ease-in-out, display 0.5s allow-discrete; */
 }
 
-.movementDates {
+.movementDate {
     font-size: 12px;
     font-style: italic;
     color: grey;
@@ -16,7 +19,6 @@
 .sumText {
     font-size: 12px;
     letter-spacing: -1px;
-    /* font-weight: bold; */
 }
 
 .transactionFooter {
@@ -33,4 +35,8 @@
 
 .closeAccount {
     background: linear-gradient(145deg, rgb(255, 96, 96), rgb(180, 48, 48));
+}
+
+.hidden {
+    opacity: 0;
 }
