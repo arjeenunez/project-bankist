@@ -1,6 +1,5 @@
 .mainContainer {
     width: 65%;
-    /* transition: opacity 0.5s linear, display 0.5s allow-discrete; */
 }
 
 .movementDate {
@@ -15,7 +14,7 @@
 }
 
 .sumText {
-    font-size: 12px;
+    font-size: 10px;
     letter-spacing: -1px;
 }
 
@@ -34,13 +33,3 @@
 .closeAccount {
     background: linear-gradient(145deg, rgb(255, 96, 96), rgb(180, 48, 48));
 }
-
-/* .hidden {
-    opacity: 0;
-    display: none;
-
-    @starting-style {
-        opacity: 1;
-        display: block;
-    }
-} */
