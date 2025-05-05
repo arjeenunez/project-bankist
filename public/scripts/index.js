@@ -6,14 +6,15 @@ const user1 = {
     name: 'Jeffrey Knight',
     username: 'jk',
     movement: [
-        { no: 1, amount: 200, date: '2023-01-18T21:31:17.178Z' },
-        { no: 2, amount: 450, date: '2023-01-23T07:42:02.383Z' },
-        { no: 3, amount: -400, date: '2023-01-28T09:15:04.904Z' },
-        { no: 4, amount: 3000, date: '2023-02-01T10:17:24.185Z' },
-        { no: 5, amount: -650, date: '2023-02-05T14:11:59.604Z' },
-        { no: 6, amount: -130, date: '2023-02-10T17:01:17.194Z' },
-        { no: 7, amount: 70, date: '2023-02-15T23:36:17.929Z' },
-        { no: 8, amount: 1300, date: '2023-02-20T10:51:36.790Z' },
+        { no: 1, amount: 200, date: 1674072677178 },
+        { no: 2, amount: 450, date: 1674450122383 },
+        { no: 3, amount: -400, date: 1674893704904 },
+        { no: 4, amount: 3000, date: 1675241844185 },
+        { no: 5, amount: -650, date: 1675600319604 },
+        { no: 6, amount: -130, date: 1676048477194 },
+        { no: 7, amount: 70, date: 1676500577929 },
+        { no: 8, amount: 1300, date: 1676883096790 },
+        { no: 9, amount: -999, date: 1746358296790 },
     ],
     interestRate: 1.2, // %
     pin: 1111,
@@ -24,14 +25,15 @@ const user2 = {
     name: 'Tina Roberts',
     username: 'tr',
     movement: [
-        { no: 1, amount: 500, date: '2023-03-01T08:15:30.000Z' },
-        { no: 2, amount: 340, date: '2023-03-05T12:45:00.000Z' },
-        { no: 3, amount: -150, date: '2023-03-10T14:20:15.000Z' },
-        { no: 4, amount: -790, date: '2023-03-15T16:30:45.000Z' },
-        { no: 5, amount: -3210, date: '2023-03-20T18:50:10.000Z' },
-        { no: 6, amount: -1000, date: '2023-03-25T20:10:25.000Z' },
-        { no: 7, amount: 850, date: '2023-03-30T22:05:35.000Z' },
-        { no: 8, amount: -30, date: '2023-04-04T23:55:50.000Z' },
+        { no: 1, amount: 500, date: 1677651330000 },
+        { no: 2, amount: 340, date: 1678010700000 },
+        { no: 3, amount: -150, date: 1678453215000 },
+        { no: 4, amount: -790, date: 1678897845000 },
+        { no: 5, amount: -3210, date: 1679339410000 },
+        { no: 6, amount: -1000, date: 1679777425000 },
+        { no: 7, amount: 850, date: 1680216335000 },
+        { no: 8, amount: -30, date: 1680648950000 },
+        { no: 9, amount: -30, date: 1746239750000 },
     ],
     interestRate: 1.5, // %
     pin: 1234,
@@ -62,14 +64,43 @@ const viewCurrentLoginText = function (name) {
 };
 
 const viewCurrentDate = function () {
-    const currentDate = document.querySelector('.currentDate');
     const date = new Date();
-    currentDate.textContent = date;
+    const options = {
+        hour: 'numeric',
+        minute: 'numeric',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        weekday: 'long',
+    };
+    document.querySelector('.currentDate').textContent = `As of ${new Intl.DateTimeFormat(navigator.language, options).format(date)}`;
 };
 
 const viewCurrentTotalBalance = function (user) {
     const totalBalance = document.querySelector('.totalBalance');
     totalBalance.textContent = `${user.total}€`;
+};
+
+const dateFormatter = function (date) {
+    const dateDiff = Math.abs(Date.now() - date);
+    const timeUnits = [
+        { unit: 'second', value: 1000 },
+        { unit: 'minute', value: 1000 * 60 },
+        { unit: 'hour', value: 1000 * 60 * 60 },
+        { unit: 'day', value: 1000 * 60 * 60 * 24 },
+    ];
+
+    for (let i = 0; i < timeUnits.length; i++) {
+        const diff = Math.floor(dateDiff / timeUnits[i].value);
+        if (diff < (i === timeUnits.length - 1 ? 7 : 60)) {
+            if (i === 0) return `A moment ago`;
+            if (i === 1) return `${diff} ${diff === 1 ? 'minute' : 'minutes'} ago`;
+            if (i === 2) return `${diff} ${diff === 1 ? 'hour' : 'hours'} ago`;
+            if (i === 3) return diff === 1 ? `Yesterday` : `${diff} days ago`;
+        }
+    }
+
+    return new Intl.DateTimeFormat(navigator.language, { day: '2-digit', month: '2-digit', year: '2-digit' }).format(date);
 };
 
 const createTransaction = function (price, transNum, date = new Date()) {
@@ -81,9 +112,9 @@ const createTransaction = function (price, transNum, date = new Date()) {
     li.innerHTML = `
         <div>
             <span class="badge ${badgeChoice}">${transNum} ${transactionChoice}</span>
-            <span class="movementDate ms-3">${date}</span>
+            <span class="movementDate ms-3">${dateFormatter(date)}</span>
         </div>
-        <span class="fs-5">${Math.abs(price)}</span>`;
+        <span class="fs-5">${Math.abs(price)} €</span>`;
     transactionList.prepend(li);
 };
 
@@ -93,9 +124,9 @@ const clearTransactions = function () {
 };
 
 const viewCurrentSummary = function ({ sumIn, sumOut, sumInterest }) {
-    document.querySelector('.totalIn').textContent = sumIn;
-    document.querySelector('.totalOut').textContent = sumOut;
-    document.querySelector('.totalInterest').textContent = sumInterest.toFixed(2);
+    document.querySelector('.totalIn').textContent = `${sumIn}€`;
+    document.querySelector('.totalOut').textContent = `${sumOut}€`;
+    document.querySelector('.totalInterest').textContent = `${sumInterest.toFixed(2)}€`;
 };
 
 const viewCurrentTimer = function (minutes = 10, seconds = 0) {
