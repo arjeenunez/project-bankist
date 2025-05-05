@@ -75,19 +75,15 @@ const viewCurrentTotalBalance = function (user) {
 const createTransaction = function (price, transNum, date = new Date()) {
     const transactionList = document.querySelector('.transactionList');
     const li = document.createElement('li');
-    const div = document.createElement('div');
-    const span1 = document.createElement('span');
-    const span2 = document.createElement('span');
-    const span3 = document.createElement('span');
-    li.classList.add('transactionItem', 'd-flex', 'justify-content-between', 'align-items-center', 'ps-5', 'pe-5', 'border-bottom');
-    span1.classList.add('badge', `${price < 0 ? 'text-bg-danger' : 'text-bg-primary'}`);
-    span1.textContent = `${transNum} ${price < 0 ? 'Withdrawal' : 'Deposit'}`;
-    span2.classList.add('movementDate', 'ms-3');
-    span2.textContent = date;
-    span3.classList.add('fs-5');
-    span3.textContent = Math.abs(price);
-    div.append(span1, span2);
-    li.append(div, span3);
+    li.className = 'transactionItem d-flex justify-content-between align-items-center ps-5 pe-5 border-bottom';
+    const badgeChoice = price < 0 ? 'text-bg-danger' : 'text-bg-primary';
+    const transactionChoice = price < 0 ? 'Withdrawal' : 'Deposit';
+    li.innerHTML = `
+        <div>
+            <span class="badge ${badgeChoice}">${transNum} ${transactionChoice}</span>
+            <span class="movementDate ms-3">${date}</span>
+        </div>
+        <span class="fs-5">${Math.abs(price)}</span>`;
     transactionList.prepend(li);
 };
 
@@ -96,25 +92,19 @@ const clearTransactions = function () {
     transactionList.innerHTML = '';
 };
 
-const viewCurrentSummary = function (user) {
-    const totalIn = document.querySelector('.totalIn');
-    const totalOut = document.querySelector('.totalOut');
-    const totalInterest = document.querySelector('.totalInterest');
-    totalIn.textContent = user.sumIn;
-    totalOut.textContent = user.sumOut;
-    totalInterest.textContent = user.sumInterest.toFixed(2);
+const viewCurrentSummary = function ({ sumIn, sumOut, sumInterest }) {
+    document.querySelector('.totalIn').textContent = sumIn;
+    document.querySelector('.totalOut').textContent = sumOut;
+    document.querySelector('.totalInterest').textContent = sumInterest.toFixed(2);
 };
 
 const viewCurrentTimer = function (minutes = 10, seconds = 0) {
-    const countdown = document.querySelector('.countdown');
     let mins = minutes < 10 ? `0${minutes}` : minutes;
     let secs = seconds < 10 ? `0${seconds}` : seconds;
-    countdown.textContent = `You'll be automatically logged out in ${mins}:${secs}`;
+    document.querySelector('.countdown').textContent = `You'll be automatically logged out in ${mins}:${secs}`;
 };
 
 const toggleLoginElements = function () {
-    const mainContainer = document.querySelector('.mainContainer');
-
     const toggleDisplay = domNode => {
         if (domNode.classList.contains('fullyHidden')) {
             domNode.classList.toggle('fullyHidden');
@@ -124,10 +114,8 @@ const toggleLoginElements = function () {
             domNode.classList.toggle('fullyHidden');
         }
     };
-
-    toggleDisplay(mainContainer);
-    toggleDisplay(loginForm);
-    toggleDisplay(logoutForm);
+    const nodeElements = [document.querySelector('.mainContainer'), loginForm, logoutForm];
+    nodeElements.forEach(component => toggleDisplay(component));
 };
 
 // Controllers
@@ -242,30 +230,17 @@ closeAccountForm.addEventListener('submit', function (evt) {
     closePassword.value = '';
 });
 
-let count = 0;
-sortBtn.addEventListener('click', function (evt) {
+sortBtn.addEventListener('click', function () {
     clearTransactions();
-    count++;
-    if (count === 1) {
-        currentUser.movement.sort((a, b) => a.amount - b.amount);
-        for (let arr of currentUser.movement) {
-            createTransaction(arr.amount, arr.no, arr.date);
-        }
-        this.textContent = '↑ Sort';
-    }
-    if (count === 2) {
-        currentUser.movement.sort((a, b) => b.amount - a.amount);
-        for (let arr of currentUser.movement) {
-            createTransaction(arr.amount, arr.no, arr.date);
-        }
-        this.textContent = 'Sort';
-    }
-    if (count === 3) count = 0;
-    if (!count) {
-        currentUser.movement.sort((a, b) => a.no - b.no);
-        for (let arr of currentUser.movement) {
-            createTransaction(arr.amount, arr.no, arr.date);
-        }
-        this.textContent = '↓ Sort';
-    }
+    this.count = (this.count || 0) + 1;
+    const chosenOption = this.count % 3;
+    const options = [
+        { comp: (a, b) => a.amount - b.amount, text: '↑ Sort' },
+        { comp: (a, b) => b.amount - a.amount, text: 'Sort' },
+        { comp: (a, b) => a.no - b.no, text: '↓ Sort' },
+    ];
+    const { comp, text } = options[chosenOption];
+    currentUser.movement.sort(comp);
+    this.textContent = text;
+    currentUser.movement.forEach(({ amount, no, date }) => createTransaction(amount, no, date));
 });
