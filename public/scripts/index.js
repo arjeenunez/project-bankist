@@ -78,7 +78,7 @@ const viewCurrentDate = function () {
 
 const viewCurrentTotalBalance = function (user) {
     const totalBalance = document.querySelector('.totalBalance');
-    totalBalance.textContent = `${user.total}€`;
+    totalBalance.textContent = numFor(user.total);
 };
 
 const dateFormatter = function (date) {
@@ -114,7 +114,7 @@ const createTransaction = function (price, transNum, date = new Date()) {
             <span class="badge ${badgeChoice}">${transNum} ${transactionChoice}</span>
             <span class="movementDate ms-3">${dateFormatter(date)}</span>
         </div>
-        <span class="fs-5">${Math.abs(price)} €</span>`;
+        <span class="fs-5">${numFor(Math.abs(price))}</span>`;
     transactionList.prepend(li);
 };
 
@@ -123,10 +123,14 @@ const clearTransactions = function () {
     transactionList.innerHTML = '';
 };
 
+const numFor = function (num) {
+    return new Intl.NumberFormat(navigator.language, { style: 'currency', currency: 'USD' }).format(num);
+};
+
 const viewCurrentSummary = function ({ sumIn, sumOut, sumInterest }) {
-    document.querySelector('.totalIn').textContent = `${sumIn}€`;
-    document.querySelector('.totalOut').textContent = `${sumOut}€`;
-    document.querySelector('.totalInterest').textContent = `${sumInterest.toFixed(2)}€`;
+    document.querySelector('.totalIn').textContent = numFor(sumIn);
+    document.querySelector('.totalOut').textContent = numFor(sumOut);
+    document.querySelector('.totalInterest').textContent = numFor(sumInterest.toFixed(2));
 };
 
 const viewCurrentTimer = function (minutes = 10, seconds = 0) {
@@ -159,9 +163,7 @@ const loggedIn = user => {
     viewCurrentSummary(user);
     clearTransactions();
     viewCurrentLoginText(user.name);
-    for (let i = 0; i < user.movement.length; i++) {
-        createTransaction(user.movement[i].amount, user.movement[i].no, user.movement[i].date);
-    }
+    user.movement.forEach(({ amount, no, date }) => createTransaction(amount, no, date));
 };
 
 const loggedOut = () => {
@@ -170,25 +172,30 @@ const loggedOut = () => {
     viewCurrentTimer();
 };
 
-let intervalCountdown = null;
+const logoutTimer = (function () {
+    let intervalCountdown = null;
 
-const logoutTimerEnd = () => clearInterval(intervalCountdown);
+    const start = function () {
+        const date = Date.now() + 10 * 60 * 1000 + 1000;
+        intervalCountdown = setInterval(() => {
+            let dateNow = Date.now();
+            let timeLeft = date - dateNow;
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            viewCurrentTimer(minutes, seconds);
+            if (dateNow > date - 1000) {
+                currentUser = null;
+                clearTransactions();
+                toggleLoginElements();
+                stop();
+            }
+        }, 1000);
+    };
 
-const logoutTimerStart = function () {
-    const date = Date.now() + 10 * 60 * 1000 + 1000;
-    intervalCountdown = setInterval(() => {
-        let dateNow = Date.now();
-        let timeLeft = date - dateNow;
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        viewCurrentTimer(minutes, seconds);
-        if (dateNow > date - 1000) {
-            currentUser = null;
-            toggleLoginElements();
-            logoutTimerEnd();
-        }
-    }, 1000);
-};
+    const stop = () => clearInterval(intervalCountdown);
+
+    return { start, stop };
+})();
 
 // Controllers - events
 
@@ -207,7 +214,7 @@ loginForm.addEventListener('submit', function (evt) {
     if (foundUser && foundUser.pin === +passwordInput.value) {
         currentUser = foundUser;
         loggedIn(currentUser);
-        logoutTimerStart();
+        logoutTimer.start();
     }
     usernameInput.value = '';
     passwordInput.value = '';
@@ -216,7 +223,7 @@ loginForm.addEventListener('submit', function (evt) {
 logoutForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
     loggedOut(currentUser);
-    logoutTimerEnd();
+    logoutTimer.stop();
 });
 
 requestLoanForm.addEventListener('submit', function (evt) {
@@ -253,7 +260,7 @@ closeAccountForm.addEventListener('submit', function (evt) {
     const foundUser = users.find(el => el.username === closeUsername.value);
     if (foundUser && foundUser.username === currentUser.username && +closePassword.value === currentUser.pin) {
         userDelete(currentUser);
-        logoutTimerEnd();
+        logoutTimer.stop();
         loggedOut(currentUser);
     }
 
