@@ -50,6 +50,9 @@ const totalIn = document.querySelector('.totalIn');
 const totalOut = document.querySelector('.totalOut');
 const totalInterest = document.querySelector('.totalInterest');
 const countdown = document.querySelector('.countdown');
+const transferMoneyForm = document.querySelector('.transferMoney');
+const requestLoanForm = document.querySelector('.requestLoan');
+const closeAccountForm = document.querySelector('.closeAccount');
 
 const updateCurrentDate = function () {
     const date = new Date();
@@ -63,30 +66,36 @@ const updateTotalBalance = function () {
 };
 
 const updateTransactions = function () {
-    const create = el => document.createElement(el);
+    transactionList.innerHTML = '';
     for (let i = currentUser.movements.length - 1; i >= 0; i--) {
-        let trans = currentUser.movements[i];
-        const li = create('li');
-        const div = document.createElement('div');
-        const span1 = document.createElement('span');
-        const span2 = document.createElement('span');
-        const span3 = document.createElement('span');
-        li.classList.add('transactionItem', 'd-flex', 'justify-content-between', 'align-items-center', 'ps-5', 'pe-5', 'border-bottom');
-        if (trans < 0) {
-            span1.classList.add('badge', 'text-bg-danger');
-            span1.textContent = `${i + 1} Withdrawal`;
-        } else {
-            span1.classList.add('badge', 'text-bg-primary');
-            span1.textContent = `${i + 1} Deposit`;
-        }
-        span2.classList.add('movementDate', 'ms-3');
-        span2.textContent = currentUser.movementDates[i];
-        span3.classList.add('fs-5');
-        span3.textContent = Math.abs(trans);
-        div.append(span1, span2);
-        li.append(div, span3);
-        transactionList.append(li);
+        const transaction = createTransactionItem(currentUser.movements[i], currentUser.movementDates[i], i + 1);
+        transactionList.append(transaction);
     }
+};
+
+const addTransaction = function (price, date) {
+    currentUser.movements.push(price);
+    currentUser.movementDates.push(date);
+    const transaction = createTransactionItem(price, date, currentUser.movements.length);
+    transactionList.prepend(transaction);
+};
+
+const createTransactionItem = function (price, date, transNum) {
+    const li = document.createElement('li');
+    const div = document.createElement('div');
+    const span1 = document.createElement('span');
+    const span2 = document.createElement('span');
+    const span3 = document.createElement('span');
+    li.classList.add('transactionItem', 'd-flex', 'justify-content-between', 'align-items-center', 'ps-5', 'pe-5', 'border-bottom');
+    span1.classList.add('badge', `${price < 0 ? 'text-bg-danger' : 'text-bg-primary'}`);
+    span1.textContent = `${transNum} ${price < 0 ? 'Withdrawal' : 'Deposit'}`;
+    span2.classList.add('movementDate', 'ms-3');
+    span2.textContent = date;
+    span3.classList.add('fs-5');
+    span3.textContent = Math.abs(price);
+    div.append(span1, span2);
+    li.append(div, span3);
+    return li;
 };
 
 const updateTotals = function () {
@@ -102,6 +111,9 @@ const toggleLoginElements = function () {
     mainContainer.classList.toggle('d-none');
     loginForm.classList.toggle('d-none');
     logoutForm.classList.toggle('d-none');
+    // mainContainer.classList.toggle('hidden');
+    // loginForm.classList.toggle('hidden');
+    // logoutForm.classList.toggle('hidden');
 };
 
 const userLoggedOut = () => {
@@ -151,19 +163,9 @@ logoutForm.addEventListener('submit', function (evt) {
     userLoggedOut();
 });
 
-// const currentDate = document.querySelector('.currentDate');
-
-// const date = new Date();
-// const day = date.getDate();
-// const month = date.getMonth() + 1; // Months are zero-based
-// const year = date.getFullYear();
-// const hours = date.getHours();
-// const minutes = date.getMinutes();
-
-// currentDate.textContent = `As of ${day}/${month}/${year} ${hours}:${minutes}`;
-
-// const loginForm = document.querySelector('.loginForm');
-
-// loginForm.addEventListener('submit', function (evt) {
-//     evt.preventDefault();
-// });
+requestLoanForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    const loanAmount = document.querySelector('.loanAmount');
+    const date = new Date();
+    addTransaction(+loanAmount.value, date);
+});

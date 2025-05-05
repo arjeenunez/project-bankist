@@ -1,8 +1,6 @@
 .mainContainer {
     width: 65%;
-    /* opacity: 1; */
-    transition: all ease-in-out 1000ms;
-    /* transition: opacity 0.5s ease-in-out, display 0.5s allow-discrete; */
+    /* transition: opacity 0.5s linear, display 0.5s allow-discrete; */
 }
 
 .movementDate {
@@ -37,6 +35,12 @@
     background: linear-gradient(145deg, rgb(255, 96, 96), rgb(180, 48, 48));
 }
 
-.hidden {
+/* .hidden {
     opacity: 0;
-}
+    display: none;
+
+    @starting-style {
+        opacity: 1;
+        display: block;
+    }
+} */
