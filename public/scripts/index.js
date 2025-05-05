@@ -1,38 +1,37 @@
 'use strict';
 
 // Models
-
+//prettier-ignore
 const user1 = {
     name: 'Jeffrey Knight',
     username: 'jk',
-    movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
-    movementDates: [
-        '2023-01-18T21:31:17.178Z',
-        '2023-01-23T07:42:02.383Z',
-        '2023-01-28T09:15:04.904Z',
-        '2023-02-01T10:17:24.185Z',
-        '2023-02-05T14:11:59.604Z',
-        '2023-02-10T17:01:17.194Z',
-        '2023-02-15T23:36:17.929Z',
-        '2023-02-20T10:51:36.790Z',
+    movement: [
+        { no: 1, amount: 200, date: '2023-01-18T21:31:17.178Z' },
+        { no: 2, amount: 450, date: '2023-01-23T07:42:02.383Z' },
+        { no: 3, amount: -400, date: '2023-01-28T09:15:04.904Z' },
+        { no: 4, amount: 3000, date: '2023-02-01T10:17:24.185Z' },
+        { no: 5, amount: -650, date: '2023-02-05T14:11:59.604Z' },
+        { no: 6, amount: -130, date: '2023-02-10T17:01:17.194Z' },
+        { no: 7, amount: 70, date: '2023-02-15T23:36:17.929Z' },
+        { no: 8, amount: 1300, date: '2023-02-20T10:51:36.790Z' },
     ],
     interestRate: 1.2, // %
     pin: 1111,
 };
 
+//prettier-ignore
 const user2 = {
     name: 'Tina Roberts',
     username: 'tr',
-    movements: [500, 340, -150, -790, -3210, -1000, 850, -30],
-    movementDates: [
-        '2023-03-01T08:15:30.000Z',
-        '2023-03-05T12:45:00.000Z',
-        '2023-03-10T14:20:15.000Z',
-        '2023-03-15T16:30:45.000Z',
-        '2023-03-20T18:50:10.000Z',
-        '2023-03-25T20:10:25.000Z',
-        '2023-03-30T22:05:35.000Z',
-        '2023-04-04T23:55:50.000Z',
+    movement: [
+        { no: 1, amount: 500, date: '2023-03-01T08:15:30.000Z' },
+        { no: 2, amount: 340, date: '2023-03-05T12:45:00.000Z' },
+        { no: 3, amount: -150, date: '2023-03-10T14:20:15.000Z' },
+        { no: 4, amount: -790, date: '2023-03-15T16:30:45.000Z' },
+        { no: 5, amount: -3210, date: '2023-03-20T18:50:10.000Z' },
+        { no: 6, amount: -1000, date: '2023-03-25T20:10:25.000Z' },
+        { no: 7, amount: 850, date: '2023-03-30T22:05:35.000Z' },
+        { no: 8, amount: -30, date: '2023-04-04T23:55:50.000Z' },
     ],
     interestRate: 1.5, // %
     pin: 1234,
@@ -43,12 +42,11 @@ let currentUser = null;
 
 const userUpdate = function (user, amount = null, date = new Date()) {
     if (amount) {
-        user.movements.push(amount);
-        user.movementDates.push(date);
+        user.movement.push({ no: user.movement.length + 1, amount, date });
     }
-    user.total = user.movements.reduce((total, el) => total + el);
-    user.sumIn = user.movements.filter(el => el > 0).reduce((total, el) => total + el);
-    user.sumOut = user.movements.filter(el => el < 0).reduce((total, el) => total + Math.abs(el), 0);
+    user.total = user.movement.reduce((total, el) => total + el.amount, 0);
+    user.sumIn = user.movement.filter(el => el.amount > 0).reduce((total, el) => total + el.amount, 0);
+    user.sumOut = user.movement.filter(el => el.amount < 0).reduce((total, el) => total + Math.abs(el.amount), 0);
     user.sumInterest = user.sumIn * (user.interestRate / 100);
 };
 
@@ -131,8 +129,8 @@ const loggedIn = user => {
     viewCurrentSummary(user);
     clearTransactions();
     viewCurrentLoginText(user.name);
-    for (let i = 0; i < user.movements.length; i++) {
-        createTransaction(user.movements[i], i + 1, user.movementDates[i]);
+    for (let i = 0; i < user.movement.length; i++) {
+        createTransaction(user.movement[i].amount, user.movement[i].no, user.movement[i].date);
     }
 };
 
@@ -169,6 +167,7 @@ const logoutForm = document.querySelector('.logoutForm');
 const requestLoanForm = document.querySelector('.requestLoan');
 const transferMoneyForm = document.querySelector('.transferMoney');
 const closeAccountForm = document.querySelector('.closeAccount');
+const sortBtn = document.querySelector('.sortBtn');
 
 loginForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
@@ -196,7 +195,7 @@ requestLoanForm.addEventListener('submit', function (evt) {
     userUpdate(currentUser, +loanAmount.value);
     viewCurrentSummary(currentUser);
     viewCurrentTotalBalance(currentUser);
-    createTransaction(+loanAmount.value, currentUser.movements.length);
+    createTransaction(+loanAmount.value, currentUser.movement.length);
     loanAmount.value = '';
 });
 
@@ -210,7 +209,7 @@ transferMoneyForm.addEventListener('submit', function (evt) {
         userUpdate(foundUser, +transferAmount.value);
         viewCurrentSummary(currentUser);
         viewCurrentTotalBalance(currentUser);
-        createTransaction(-Number(transferAmount.value), currentUser.movements.length);
+        createTransaction(-Number(transferAmount.value), currentUser.movement.length);
     }
     transferAmount.value = '';
     transferUser.value = '';
@@ -226,5 +225,36 @@ closeAccountForm.addEventListener('submit', function (evt) {
         userDelete(currentUser);
         logoutTimerEnd();
         loggedOut(currentUser);
+    }
+
+    closeUsername.value = '';
+    closePassword.value = '';
+});
+
+let count = 0;
+sortBtn.addEventListener('click', function (evt) {
+    clearTransactions();
+    count++;
+    if (count === 1) {
+        currentUser.movement.sort((a, b) => a.amount - b.amount);
+        for (let arr of currentUser.movement) {
+            createTransaction(arr.amount, arr.no, arr.date);
+        }
+        this.textContent = '↑ Sort';
+    }
+    if (count === 2) {
+        currentUser.movement.sort((a, b) => b.amount - a.amount);
+        for (let arr of currentUser.movement) {
+            createTransaction(arr.amount, arr.no, arr.date);
+        }
+        this.textContent = 'Sort';
+    }
+    if (count === 3) count = 0;
+    if (!count) {
+        currentUser.movement.sort((a, b) => a.no - b.no);
+        for (let arr of currentUser.movement) {
+            createTransaction(arr.amount, arr.no, arr.date);
+        }
+        this.textContent = '↓ Sort';
     }
 });
