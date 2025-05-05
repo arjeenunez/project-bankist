@@ -114,9 +114,20 @@ const viewCurrentTimer = function (minutes = 10, seconds = 0) {
 
 const toggleLoginElements = function () {
     const mainContainer = document.querySelector('.mainContainer');
-    mainContainer.classList.toggle('d-none');
-    loginForm.classList.toggle('d-none');
-    logoutForm.classList.toggle('d-none');
+
+    const toggleDisplay = domNode => {
+        if (domNode.classList.contains('fullyHidden')) {
+            domNode.classList.toggle('fullyHidden');
+            setTimeout(() => domNode.classList.toggle('hidden'), 0);
+        } else {
+            domNode.classList.toggle('hidden');
+            domNode.classList.toggle('fullyHidden');
+        }
+    };
+
+    toggleDisplay(mainContainer);
+    toggleDisplay(loginForm);
+    toggleDisplay(logoutForm);
 };
 
 // Controllers

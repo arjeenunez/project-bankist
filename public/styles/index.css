@@ -1,5 +1,18 @@
 .mainContainer {
     width: 65%;
+    display: block;
+}
+
+.loginForm,
+.logoutForm {
+    display: flex;
+}
+
+.mainContainer,
+.logoutForm,
+.loginForm {
+    opacity: 1;
+    transition: all ease-in-out 250ms;
 }
 
 .movementDate {
@@ -32,4 +45,12 @@
 
 .closeAccount {
     background: linear-gradient(145deg, rgb(255, 96, 96), rgb(180, 48, 48));
+}
+
+.hidden {
+    opacity: 0;
+}
+
+.fullyHidden {
+    display: none;
 }
