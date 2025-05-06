@@ -81,6 +81,8 @@ const viewCurrentTotalBalance = function (user) {
     totalBalance.textContent = numFor(user.total);
 };
 
+// FIXME: Need to check conditions for the hours, displaying 31 hours ago rather than 1 day ago
+
 const dateFormatter = function (date) {
     const dateDiff = Math.abs(Date.now() - date);
     const timeUnits = [
