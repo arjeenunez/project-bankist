@@ -18,6 +18,7 @@ const user1 = {
     ],
     interestRate: 1.2, // %
     pin: 1111,
+    currency: "USD",
 };
 
 //prettier-ignore
@@ -37,6 +38,7 @@ const user2 = {
     ],
     interestRate: 1.5, // %
     pin: 1234,
+    currency: "EUR"
 };
 
 let users = [user1, user2];
@@ -76,9 +78,9 @@ const viewCurrentDate = function () {
     document.querySelector('.currentDate').textContent = `As of ${new Intl.DateTimeFormat(navigator.language, options).format(date)}`;
 };
 
-const viewCurrentTotalBalance = function (user) {
+const viewCurrentTotalBalance = function ({ total, currency }) {
     const totalBalance = document.querySelector('.totalBalance');
-    totalBalance.textContent = numFor(user.total);
+    totalBalance.textContent = numFor(total, currency);
 };
 
 // FIXME: Need to check conditions for the hours, displaying 31 hours ago rather than 1 day ago
@@ -105,7 +107,7 @@ const dateFormatter = function (date) {
     return new Intl.DateTimeFormat(navigator.language, { day: '2-digit', month: '2-digit', year: '2-digit' }).format(date);
 };
 
-const createTransaction = function (price, transNum, date = new Date()) {
+const createTransaction = function (price, transNum, date = Date.now(), currency = 'USD') {
     const transactionList = document.querySelector('.transactionList');
     const li = document.createElement('li');
     li.className = 'transactionItem d-flex justify-content-between align-items-center ps-5 pe-5 border-bottom';
@@ -114,9 +116,9 @@ const createTransaction = function (price, transNum, date = new Date()) {
     li.innerHTML = `
         <div>
             <span class="badge ${badgeChoice}">${transNum} ${transactionChoice}</span>
-            <span class="movementDate ms-3">${dateFormatter(date)}</span>
+            <span class="movementDate ms-3">${dateFormatter(date ? date : new Date())}</span>
         </div>
-        <span class="fs-5">${numFor(Math.abs(price))}</span>`;
+        <span class="fs-5">${numFor(Math.abs(price), currency)}</span>`;
     transactionList.prepend(li);
 };
 
@@ -125,14 +127,14 @@ const clearTransactions = function () {
     transactionList.innerHTML = '';
 };
 
-const numFor = function (num) {
-    return new Intl.NumberFormat(navigator.language, { style: 'currency', currency: 'USD' }).format(num);
+const numFor = function (num, currency = 'EUR') {
+    return new Intl.NumberFormat(navigator.language, { style: 'currency', currency: currency }).format(num);
 };
 
-const viewCurrentSummary = function ({ sumIn, sumOut, sumInterest }) {
-    document.querySelector('.totalIn').textContent = numFor(sumIn);
-    document.querySelector('.totalOut').textContent = numFor(sumOut);
-    document.querySelector('.totalInterest').textContent = numFor(sumInterest.toFixed(2));
+const viewCurrentSummary = function ({ sumIn, sumOut, sumInterest, currency }) {
+    document.querySelector('.totalIn').textContent = numFor(sumIn, currency);
+    document.querySelector('.totalOut').textContent = numFor(sumOut, currency);
+    document.querySelector('.totalInterest').textContent = numFor(sumInterest.toFixed(2), currency);
 };
 
 const viewCurrentTimer = function (minutes = 10, seconds = 0) {
@@ -165,7 +167,7 @@ const loggedIn = user => {
     viewCurrentSummary(user);
     clearTransactions();
     viewCurrentLoginText(user.name);
-    user.movement.forEach(({ amount, no, date }) => createTransaction(amount, no, date));
+    user.movement.forEach(({ amount, no, date }) => createTransaction(amount, no, date, user.currency));
 };
 
 const loggedOut = () => {
@@ -231,10 +233,13 @@ logoutForm.addEventListener('submit', function (evt) {
 requestLoanForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
     const loanAmount = document.querySelector('.loanAmount');
-    userUpdate(currentUser, +loanAmount.value);
-    viewCurrentSummary(currentUser);
-    viewCurrentTotalBalance(currentUser);
-    createTransaction(+loanAmount.value, currentUser.movement.length);
+    let amount = +loanAmount.value;
+    setTimeout(() => {
+        userUpdate(currentUser, amount);
+        viewCurrentSummary(currentUser);
+        viewCurrentTotalBalance(currentUser);
+        createTransaction(amount, currentUser.movement.length, null, currentUser.currency);
+    }, 1000);
     loanAmount.value = '';
 });
 
@@ -248,7 +253,7 @@ transferMoneyForm.addEventListener('submit', function (evt) {
         userUpdate(foundUser, +transferAmount.value);
         viewCurrentSummary(currentUser);
         viewCurrentTotalBalance(currentUser);
-        createTransaction(-Number(transferAmount.value), currentUser.movement.length);
+        createTransaction(-Number(transferAmount.value), currentUser.movement.length, null, currentUser.currency);
     }
     transferAmount.value = '';
     transferUser.value = '';
@@ -283,5 +288,5 @@ sortBtn.addEventListener('click', function () {
     const { comp, text } = options[chosenOption];
     currentUser.movement.sort(comp);
     this.textContent = text;
-    currentUser.movement.forEach(({ amount, no, date }) => createTransaction(amount, no, date));
+    currentUser.movement.forEach(({ amount, no, date }) => createTransaction(amount, no, date, currentUser.currency));
 });
