@@ -272,8 +272,9 @@ closeAccountForm.addEventListener('submit', function (evt) {
 
 sortBtn.addEventListener('click', function () {
     clearTransactions();
-    this.count = (this.count || 0) + 1;
+    this.count = this.count || 0;
     const chosenOption = this.count % 3;
+    this.count++;
     const options = [
         { comp: (a, b) => a.amount - b.amount, text: '↑ Sort' },
         { comp: (a, b) => b.amount - a.amount, text: 'Sort' },
